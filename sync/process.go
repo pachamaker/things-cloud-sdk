@@ -409,6 +409,9 @@ func applyTaskPayload(old *things.Task, uuid string, p things.TaskActionItemPayl
 		t.RecurrenceIDs = old.RecurrenceIDs
 		t.DelegateIDs = old.DelegateIDs
 		t.Repeater = old.Repeater
+		t.StartBucket = old.StartBucket
+		t.DeadlineSuppressionDate = old.DeadlineSuppressionDate
+		t.TodayIndexReferenceDate = old.TodayIndexReferenceDate
 	}
 
 	// Apply each non-nil field from payload
@@ -474,6 +477,15 @@ func applyTaskPayload(old *things.Task, uuid string, p things.TaskActionItemPayl
 	}
 	if p.DelegateIDs != nil {
 		t.DelegateIDs = *p.DelegateIDs
+	}
+	if p.SubtaskBehavior != nil {
+		t.StartBucket = *p.SubtaskBehavior
+	}
+	if p.DeadlineSuppression != nil {
+		t.DeadlineSuppressionDate = p.DeadlineSuppression.Time()
+	}
+	if p.TaskIR != nil {
+		t.TodayIndexReferenceDate = p.TaskIR.Time()
 	}
 
 	return t

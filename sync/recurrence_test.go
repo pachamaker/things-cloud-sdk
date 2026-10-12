@@ -94,6 +94,9 @@ func TestMigration3AddsRecurrenceIDs(t *testing.T) {
 	// Turn the fresh database into a schema 2 one.
 	for _, stmt := range []string{
 		`ALTER TABLE tasks DROP COLUMN recurrence_ids`,
+		`ALTER TABLE tasks DROP COLUMN start_bucket`,
+		`ALTER TABLE tasks DROP COLUMN deadline_suppression_date`,
+		`ALTER TABLE tasks DROP COLUMN today_index_reference_date`,
 		`UPDATE schema_version SET version = 2`,
 	} {
 		if _, err := s.rawDB.Exec(stmt); err != nil {

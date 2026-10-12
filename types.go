@@ -216,6 +216,17 @@ type Task struct {
 	// Repeater (rr) is the repeat rule. Things keeps it on a hidden template;
 	// the visible to-dos it generates carry the template in RecurrenceIDs.
 	Repeater *RepeaterConfiguration
+	// StartBucket (sb) is the section of Today a to-do is listed in: 0 for
+	// the main list, 1 for This Evening.
+	StartBucket int
+	// DeadlineSuppressionDate (dds) is set when the user dismisses an overdue
+	// deadline from Today. While it is set, the deadline alone no longer puts
+	// the to-do in Today.
+	DeadlineSuppressionDate *time.Time
+	// TodayIndexReferenceDate (tir) is the day TodayIndex refers to. Things
+	// writes it together with ScheduledDate (sr) when a to-do is put into
+	// Today; it never changes ScheduledDate.
+	TodayIndexReferenceDate *time.Time
 }
 
 // IsRepeatingTemplate reports whether t is the hidden template of a repeating
@@ -239,7 +250,7 @@ type TaskActionItemPayload struct {
 	ScheduledDate             *Timestamp             `json:"sr,omitempty"`
 	CompletionDate            *Timestamp             `json:"sp,omitempty"`
 	DeadlineDate              *Timestamp             `json:"dd,omitempty"`  //
-	TaskIR                    *Timestamp             `json:"tir,omitempty"` // hm, not sure what tir stands for
+	TaskIR                    *Timestamp             `json:"tir,omitempty"` // today index reference date
 	Status                    *TaskStatus            `json:"ss,omitempty"`
 	Type                      *TaskType              `json:"tp,omitempty"`
 	Title                     *string                `json:"tt,omitempty"`
@@ -258,7 +269,7 @@ type TaskActionItemPayload struct {
 	IsCompletedByChildren     *bool                  `json:"icp,omitempty"`
 	IsCompletedCount          *int                   `json:"icc,omitempty"`
 	InstanceCreationStartDate *Timestamp             `json:"icsd,omitempty"`
-	SubtaskBehavior           *int                   `json:"sb,omitempty"`
+	SubtaskBehavior           *int                   `json:"sb,omitempty"` // start bucket: 1 is This Evening
 	DelegateIDs               *[]string              `json:"dl,omitempty"`
 	LastActionItemID          *Timestamp             `json:"lai,omitempty"`
 	ReminderDate              *Timestamp             `json:"rmd,omitempty"` // legacy API name: repeater migration date, not a reminder

@@ -155,6 +155,34 @@ func TestStateUpdateTask7RepeatRule(t *testing.T) {
 	}
 }
 
+func TestStateUpdateTask7ViewFields(t *testing.T) {
+	t.Parallel()
+
+	state := NewState()
+	if err := state.Update(
+		taskReadItem("view", task7Kind, things.ItemActionCreated, `{"tt":"evening","st":1,"sr":1760140800,"tir":1760140800,"sb":1,"dd":1760054400,"dds":1760140800}`),
+		taskReadItem("view", task7Kind, things.ItemActionModified, `{"tt":"renamed"}`),
+	); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+	day := time.Unix(1760140800, 0).UTC()
+	task := requireTask(t, state, "view")
+	if task.StartBucket != 1 || task.TodayIndexReferenceDate == nil || !task.TodayIndexReferenceDate.Equal(day) ||
+		task.DeadlineSuppressionDate == nil || !task.DeadlineSuppressionDate.Equal(day) {
+		t.Fatalf("sb, tir or dds not kept: sb %d, tir %v, dds %v", task.StartBucket, task.TodayIndexReferenceDate, task.DeadlineSuppressionDate)
+	}
+	if err := state.Update(taskReadItem("view", task7Kind, things.ItemActionModified, `{"sb":null,"tir":null,"dds":null}`)); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+	task = requireTask(t, state, "view")
+	if task.StartBucket != 0 || task.TodayIndexReferenceDate != nil || task.DeadlineSuppressionDate != nil {
+		t.Fatalf("nulls not cleared: sb %d, tir %v, dds %v", task.StartBucket, task.TodayIndexReferenceDate, task.DeadlineSuppressionDate)
+	}
+	if task.ScheduledDate == nil || !task.ScheduledDate.Equal(day) {
+		t.Fatalf("null tir changed sr: %v", task.ScheduledDate)
+	}
+}
+
 func TestStateUpdateTask7ScheduleStatusTrashAndDeletion(t *testing.T) {
 	t.Parallel()
 
